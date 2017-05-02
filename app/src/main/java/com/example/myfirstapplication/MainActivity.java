@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,9 +85,28 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClick(View view) {
         if(isNetworkAvailable()) {
+            RadioGroup daysButtons = (RadioGroup) findViewById(R.id.daysButtons);
+            int selectedDayId = daysButtons.getCheckedRadioButtonId();
+            int selectedDay = 0;
+
+            switch(selectedDayId) {
+                case R.id.buttonWorkingDay:
+                    selectedDay = Calendar.MONDAY;
+                    break;
+                case R.id.buttonStaurday:
+                    selectedDay = Calendar.SATURDAY;
+                    break;
+                case R.id.buttonSunday:
+                    selectedDay = Calendar.SUNDAY;
+                    break;
+                default:
+                    break;
+            }
+
             Intent intent = new Intent(this, DisplayMessageActivity.class);
             intent.putExtra("startBusStop", startBusStopName.getSelectedItem().toString());
             intent.putExtra("destinationBusStop", destinationBusStopName.getSelectedItem().toString());
+            intent.putExtra("selectedDay", selectedDay);
             startActivity(intent);
         } else {
             Toast.makeText(this, "Internet is unavailable!", Toast.LENGTH_LONG).show();

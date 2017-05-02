@@ -1,6 +1,7 @@
 package com.example.myfirstapplication;
 
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,8 +18,10 @@ import org.jsoup.select.Elements;
 public class BusFinder {
 
     private ProgressBar progressBar;
+    private TextView progressText;
     private HashMap<String, String> busStopsIDs;
     private final String basePageURL = "http://www.ztz.rybnik.pl/rj/index.php";
+    private double actualProgress;
 
     public BusFinder() {
         busStopsIDs = new HashMap<String, String>();
@@ -36,17 +39,21 @@ public class BusFinder {
         this.progressBar = progressBar;
     }
 
+    public void setProgressText(TextView text) {
+        progressText = text;
+    }
+
     public String[] getAvailableBusStopsNames() {
         String[] stopsNames = busStopsIDs.keySet().toArray(new String[busStopsIDs.size()]);
         return stopsNames;
     }
 
-    public ArrayList<Bus> loadNearestBuses(String startBusStop, String destinationBusStop) throws IOException {
+    public ArrayList<Bus> loadNearestBuses(String startBusStop, String destinationBusStop, int dayOfWeek) throws IOException {
 
         ArrayList<Bus> selectedBuses = loadBuses(startBusStop, destinationBusStop);
 
         double progressValue = 50.0/selectedBuses.size();
-        double actualProgress = progressBar.getProgress();
+        actualProgress = progressBar.getProgress();
 
         for (Bus bus : selectedBuses) {
 
@@ -61,8 +68,6 @@ public class BusFinder {
             Element saturdays = columns.get(1);
             Element sundays = columns.get(2);
 
-            Calendar calendar = new GregorianCalendar();
-            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
             Elements odjazdy;
 
             switch (dayOfWeek) {
@@ -85,6 +90,13 @@ public class BusFinder {
             }
 
             actualProgress += progressValue;
+            progressText.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    progressText.setText((int) actualProgress + "%");
+                }
+            });
             progressBar.setProgress((int) actualProgress);
 
         }
@@ -101,7 +113,7 @@ public class BusFinder {
         Elements busesList = busStopPage.select("[name=tab_id]").first().select("option");
 
         double progressValue = 50.0/busesList.size();
-        double actualProgress = progressBar.getProgress();
+        actualProgress = progressBar.getProgress();
 
         for (Element bus : busesList) {
             String tab_id = bus.attr("value");
@@ -133,6 +145,13 @@ public class BusFinder {
             }
 
             actualProgress += progressValue;
+            progressText.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    progressText.setText((int) actualProgress + "%");
+                }
+            });
             progressBar.setProgress((int) actualProgress);
 
         }
